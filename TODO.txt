@@ -1,0 +1,8 @@
+- simple auth (just twitter for now?)
+- tags:
+  - add tag
+  - remove tag
+  - filter by tag
+  - clear filter
+  - save changes to tags
+- selectable, reorderable

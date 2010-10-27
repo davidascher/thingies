@@ -9,7 +9,6 @@
     <script src="static/vendor/js/jquery-ui-1.8.5.custom.min.js"></script>
     <script src="static/vendor/underscore-1.1.0.js"></script>
     <script src="static/backbone.js"></script>
-    <!--<script src="backbone.localstorage.js"></script>-->
     <script src="static/todos.js"></script>
   </head>
 
@@ -18,8 +17,9 @@
     <div id="todoapp">
 
       <div class="title">
-        <h1>Thingies</h1>
+        <h1>Thingies: <span id="username"/></h1> 
       </div>
+      <a href="/logout">logout</a>
 
       <div class="content">
         <div id="create-todo">

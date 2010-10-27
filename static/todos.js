@@ -188,6 +188,17 @@ $(function(){
       Todos.bind('all',     this.render);
 
       Todos.fetch();
+
+  $.ajax({
+    url       : '/config',
+    type      : 'get',
+    data      : '',
+    dataType  : 'json',
+    success   : function(a) { if (a.username) { $("#username").text(a.username);} },
+    error     : function(a) { console.log("ERROR", a); }
+  });
+  
+
     },
 
     // Re-rendering the App just means refreshing the statistics -- the rest
@@ -251,9 +262,6 @@ $(function(){
     }
 
   });
-  
-  //$("#todos").selectable();
-
   // Finally, we kick things off by creating the **App**.
   window.App = new AppView;
 
