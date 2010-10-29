@@ -1,14 +1,7 @@
-// An example Backbone application contributed by
-// [Jérôme Gravel-Niquet](http://jgn.me/). This demo uses a simple
-// [LocalStorage adapter](backbone.localstorage.html)
-// to persist Backbone models within your browser.
+// inspired by the example from [Jérôme Gravel-Niquet](http://jgn.me/).
 
-// Load the application once the DOM is ready, using `jQuery.ready`:
 $(function(){
 
-  // Todo Model
-  // ----------
-  // Our basic **Todo** model has `content`, `order`, and `done` attributes.
   window.Todo = Backbone.Model.extend({
 
     // If you don't provide a todo, one will be provided for you.
@@ -19,14 +12,15 @@ $(function(){
       if (!this.get("content")) {
         this.set({"content": this.EMPTY});
       }
-      //if (!this.get("tags")) {
-      //  this.set({"tags": "[]"});
-      //}
     },
 
     // Toggle the `done` state of this todo item.
     toggle: function() {
       this.save({done: !this.get("done")});
+    },
+
+    toggleSelect: function() {
+      this.save({selected: !this.get("selected")});
     },
 
     // Remove this Todo from *localStorage*, deleting its view.
@@ -44,8 +38,6 @@ $(function(){
   // Todo Collection
   // ---------------
 
-  // The collection of todos is backed by *localStorage* instead of a remote
-  // server.
   window.TodoList = Backbone.Collection.extend({
 
     // Reference to this collection's model.
@@ -58,6 +50,10 @@ $(function(){
     // Filter down the list of all todo items that are finished.
     done: function() {
       return this.filter(function(todo){ return todo.get('done'); });
+    },
+
+    selected: function() {
+      return this.filter(function(todo){ return todo.get('selected'); });
     },
 
     // Filter down the list to only todo items that are still not finished.
@@ -97,9 +93,10 @@ $(function(){
     // The DOM events specific to an item.
     events: {
       "click .check"              : "toggleDone",
+      "click .cell"               : "toggleSelect",
       "dblclick div.todo-content" : "edit",
       "click span.todo-destroy"   : "clear",
-      "keypress .todo-input"      : "updateOnEnter"
+      "keypress .todo-input"      : "updateOnEnter",
     },
 
     // The TodoView listens for changes to its model, re-rendering. Since there's
@@ -109,11 +106,17 @@ $(function(){
       _.bindAll(this, 'render');
       this.model.bind('change', this.render);
       this.model.view = this;
+      $("#new-todo").focus();
+      $("#new-todo").select();
     },
 
     // Re-render the contents of the todo item.
     render: function() {
       $(this.el).html(this.template(this.model.toJSON()));
+      $(this.el).find(".cell").hover(function(event) {
+        obj = $(this);
+        obj.toggleClass('hover');
+      });
       this.setContent();
       return this;
     },
@@ -130,17 +133,24 @@ $(function(){
     toggleDone: function() {
       this.model.toggle();
     },
+    toggleSelect: function() {
+      this.model.toggleSelect();
+    },
 
     // Switch this view into `"editing"` mode, displaying the input field.
     edit: function() {
+      $(".editing").removeClass('editing');
       $(this.el).addClass("editing");
+      $(".editing input").select();
+      $(".editing input").focus();
     },
 
     // If you hit enter, submit the changes to the todo item's `content`.
     updateOnEnter: function(e) {
       if (e.keyCode != 13) return;
+      var updateTags = _.bind(this.updateTags, this);
       this.model.save({content: this.$(".todo-input").val(),
-                      order: 1});
+                      order: 1,}, {success: updateTags});
       $(this.el).removeClass("editing");
     },
 
@@ -150,7 +160,6 @@ $(function(){
     },
     
     error: function(a) {
-      console.log("ERROR IN VIEW", a);
     }
 
   });
@@ -171,8 +180,8 @@ $(function(){
     // Delegated events for creating new items, and clearing completed ones.
     events: {
       "keypress #new-todo":  "createOnEnter",
-      "keyup #new-todo":     "showTooltip",
-      "click .todo-clear a": "clearCompleted"
+      "click .todo-clear a": "clearCompleted",
+      "keyup #filter": "filterKeyup"
     },
 
     // At initialization we bind to the relevant events on the `Todos`
@@ -182,23 +191,40 @@ $(function(){
       _.bindAll(this, 'addOne', 'addAll', 'render');
 
       this.input    = this.$("#new-todo");
+      this.tags = ['work', 'home', 'shopping'];
+      this.words = {};
 
       Todos.bind('add',     this.addOne);
       Todos.bind('refresh', this.addAll);
       Todos.bind('all',     this.render);
-
       Todos.fetch();
 
-  $.ajax({
-    url       : '/config',
-    type      : 'get',
-    data      : '',
-    dataType  : 'json',
-    success   : function(a) { if (a.username) { $("#username").text(a.username);} },
-    error     : function(a) { console.log("ERROR", a); }
-  });
-  
+      // find out what the server needs to tell us (user name, etc.)
+      $.ajax({
+        url       : '/config',
+        type      : 'get',
+        data      : '',
+        dataType  : 'json',
+        success   : function(a) { if (a.username) { $("#username").text(a.username);} },
+        error     : function(a) { console.log("ERROR", a); }
+      });
 
+      window.tags = this.tags;
+      this.autocomplete = $("#new-todo").autocomplete(window.tags, {
+        multiple: true,
+        multipleSeparator: " ",
+        autoFill: true,
+      });
+
+      // disabling sortable because interacts badly w/ selection (move and things get unselected)
+      //$( ".sortable" ).sortable({
+      //  handle: '.handle',
+      //  revert: true
+      //});
+      $( ".cell" ).disableSelection();
+      
+      // XXX Move this to backbone model
+      $("html").keydown(_.bind(this.keypress, this));
     },
 
     // Re-rendering the App just means refreshing the statistics -- the rest
@@ -211,17 +237,41 @@ $(function(){
         remaining:  Todos.remaining().length
       }));
     },
-
+    
     // Add a single todo item to the list by creating a view for it, and
     // appending its element to the `<ul>`.
     addOne: function(todo) {
       var view = new TodoView({model: todo});
-      this.$("#todo-list").append(view.render().el);
+      
+      el = this.$("#todo-list").append(view.render().el);
+      el.view = view;
+    },
+    
+    updateTags: function() {
+      appwords = this.words;
+      _.each(Todos.models, function(item) {
+        content = item.view.model.attributes.content;
+        if (content) {
+          var words = content.match(/\w+|"[^"]+"/g); // split words
+          _.each(words, function (word) {
+            if (word in words) {
+              appwords[word]++;
+            } else {
+              appwords[word] = 1;
+            }
+          });
+        }
+      });
+      tags = _.filter(_.keys(appwords), function(word) {
+        return (appwords[word] > 0)
+      });
+      this.autocomplete.setOptions({data: tags});
     },
 
     // Add all items in the **Todos** collection at once.
     addAll: function() {
       Todos.each(this.addOne);
+      this.updateTags();
     },
 
     // Generate the attributes for a new Todo item.
@@ -230,6 +280,7 @@ $(function(){
         content: this.input.val(),
         order:   Todos.nextOrder(),
         done:    false,
+        selected:false,
         tags: "[]",
       };
     },
@@ -238,9 +289,43 @@ $(function(){
     // persisting it to *localStorage*.
     createOnEnter: function(e) {
       if (e.keyCode != 13) return;
-      
-      todo = Todos.create(this.newAttributes());
+      var updateTags = _.bind(this.updateTags, this);
+      todo = Todos.create(this.newAttributes(), {success: updateTags});
       this.input.val('');
+    },
+
+    keypress: function(e) {
+      if (e.which == 32) { // Space bar toggles Done state on all selected todos
+        if (! $(e.target).find('#todos').length) {
+          return;
+        }
+        _.each(Todos.selected(), function(todo){ todo.toggle(); });
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      else if (e.which == 27) { // Escape clears selection
+        _.each(Todos.selected(), function(todo){ todo.toggleSelect(); });
+        e.preventDefault();
+        e.stopPropagation();
+      }
+      //else if (e.which == 8) { // capture back?
+      ////  _.each(Todos.selected(), function(todo){ todo.toggleSelect(); });
+      //  e.preventDefault();
+      //  e.stopPropagation();
+      //}
+    },
+    
+    filterKeyup: function(event) {
+      var filterNode = $(event.target);
+      var filter = filterNode.val();
+      _.each($("li"), function (e) {
+        content = $(e).find('.todo-content')[0];
+        var matchString = content.textContent;
+        if (matchString && matchString.search(new RegExp(filter, "i")) < 0)
+          $(e).hide();
+        else
+          $(e).show();
+      });
     },
 
     // Clear all done todo items, destroying their models.
@@ -248,18 +333,6 @@ $(function(){
       _.each(Todos.done(), function(todo){ todo.clear(); });
       return false;
     },
-
-    // Lazily show the tooltip that tells you to press `enter` to save
-    // a new todo item, after one second.
-    showTooltip: function(e) {
-      var tooltip = this.$(".ui-tooltip-top");
-      var val = this.input.val();
-      tooltip.fadeOut();
-      if (this.tooltipTimeout) clearTimeout(this.tooltipTimeout);
-      if (val == '' || val == this.input.attr('placeholder')) return;
-      var show = function(){ tooltip.show().fadeIn(); };
-      this.tooltipTimeout = _.delay(show, 1000);
-    }
 
   });
   // Finally, we kick things off by creating the **App**.

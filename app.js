@@ -10,7 +10,8 @@ var express = require('express'),
     form = require('connect-form'), 
     auth = require('connect-auth/lib/auth'),
     OAuth = require('oauth').OAuth,
-    RedisStore = require('connect-redis')
+    RedisStore = require('connect-redis'),
+    underscore = require('./static/vendor/underscore-1.1.0.js')
     ;
 
 try {
@@ -23,6 +24,13 @@ try {
   sys.exit();
 }
 
+var PROD = !(_.include(process.argv, 'dev'));
+
+if (PROD) {
+  console.log("running in production mode, needs auth to do anything.")
+} else {
+  console.log("running in dev mode, no auth needed.")
+}
 var redis = require('redis').createClient();
 var app = express.createServer(
                         connect.cookieDecoder(), 
@@ -40,8 +48,12 @@ app.use(express.favicon());  // XXX come up with our own favicon
 app.use(express.logger({format: '":method :url" :status'}))
 app.use(app.router);
 app.use(express.bodyDecoder());
-
 // Routes
+
+function ensureAuthenticated(req) {
+  if (0)
+    assert.ok(req.isAuthenticated())
+}
 
 app.get ('/auth/twitter', function(req, res, params) {
   // next is a query parameter which indicates where to redirect to.
@@ -85,12 +97,15 @@ app.get ('/logout', function(req, res, params) {
 })
 
 function getUid(req) {
-  return req.getAuthDetails().user.username;
+  if (PROD)
+    return req.getAuthDetails().user.username;
+  else
+    return 'no idea';
 }
 
 // Get all current TODOs
 app.get('/todos', function(req, res, next){
-  assert.ok(req.isAuthenticated());
+  ensureAuthenticated(req)
   // return all todos
   uid = getUid(req);
   redis.smembers(uid+"todos", function(err, todo_keys) {
@@ -102,7 +117,11 @@ app.get('/todos', function(req, res, next){
         keys.push(todo_keys[i].toString());
       }
       redis.mget(keys, function(err, todos) {
-        res.end('['+todos.toString()+']');
+        cleanedtodos = [];
+        for (j = 0; j < todos.length; j++) {
+          if (todos[j]) cleanedtodos.push(todos[j]);
+        }
+        res.end('['+cleanedtodos.toString()+']');
       });
     } else {
       res.end('');
@@ -112,7 +131,7 @@ app.get('/todos', function(req, res, next){
 
 // Add a new TODO
 app.post('/todos', function(req, res, next){
-  assert.ok(req.isAuthenticated());
+  ensureAuthenticated(req)
   uid = getUid(req);
   redis.incr("ids::todos", function(err, id) {
     todo_key = uid+"todos::"+ id;
@@ -133,7 +152,8 @@ app.post('/todos', function(req, res, next){
 
 // Update a TODO
 app.put('/todos/(*)', function(req, res, next){
-  assert.ok(req.isAuthenticated());
+  ensureAuthenticated(req)
+  uid = getUid(req);
   todo_key = uid+"todos::" + req.params[0];
   redis.set(todo_key, req.body.model, function(err, ok) {
     res.writeHead(200, {'Content-Type': 'application/json'})
@@ -145,7 +165,7 @@ app.put('/todos/(*)', function(req, res, next){
 
 // Remove a TODO
 app.del('/todos/(*)', function(req, res, next){
-  assert.ok(req.isAuthenticated());
+  ensureAuthenticated(req)
   id = req.params[0];
   todo_key = uid+"todos::" + id;
   redis.del(todo_key, function(err, ok) {
@@ -171,11 +191,18 @@ app.get('/static/(*)$', function(req, res, next){
 
 app.get('/$', function(req, res, next){
   var pathname;
-  if (! req.isAuthenticated() ) {
+  if (PROD && (! req.isAuthenticated())) { 
     pathname = 'unauthenticated.html';
   } else {
     pathname = "index.html";
   }
+  var filename = path.join(STATIC_DIR, pathname);
+  res.sendfile(filename);
+});
+
+app.get('/test$', function(req, res, next){
+  var pathname;
+  pathname = "index.html";
   var filename = path.join(STATIC_DIR, pathname);
   res.sendfile(filename);
 });
@@ -185,7 +212,7 @@ app.get('/config$', function(req, res, next){
   if (req.isAuthenticated() ) {
     res.end(JSON.stringify(req.getAuthDetails().user));
   } else {
-    res.end('');
+    res.end(JSON.stringify({'username': 'no idea'}));
   }
 });
 

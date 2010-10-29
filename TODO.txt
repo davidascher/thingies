@@ -1,8 +1,7 @@
-- simple auth (just twitter for now?)
+- weird reflow issues with selected reflow
 - tags:
   - add tag
   - remove tag
   - filter by tag
   - clear filter
   - save changes to tags
-- selectable, reorderable

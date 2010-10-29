@@ -7,45 +7,59 @@
     <script src="static/vendor/json2.js"></script>
     <script src="static/vendor/jquery-1.4.2.js"></script>
     <script src="static/vendor/js/jquery-ui-1.8.5.custom.min.js"></script>
+    <script src="static/vendor/jquery.autocomplete.js"></script>
     <script src="static/vendor/underscore-1.1.0.js"></script>
     <script src="static/backbone.js"></script>
     <script src="static/todos.js"></script>
+    <link rel="stylesheet" type="text/css" href="static/vendor/jquery.autocomplete.css" /> 
   </head>
 
   <body>
     <!-- Todo App Interface -->
     <div id="todoapp">
 
+      <div id="account">
+        <a id="logout" href="/logout">logout</a>
+      </div>
+      
       <div class="title">
         <h1>Thingies: <span id="username"/></h1> 
       </div>
-      <a href="/logout">logout</a>
 
-      <div class="content">
         <div id="create-todo">
           <input id="new-todo" placeholder="What needs to be done?" type="text" />
-          <span class="ui-tooltip-top" style="display:none;">Press Enter to save this task</span>
+          <input id="filter" placeholder="filter by..." type="search"/>
         </div>
+
+      <div id="main">
         <div id="todos">
-          <ul id="todo-list"></ul>
+          <ul id="todo-list" class="grid sortable"/>
         </div>
-        <div id="todo-stats"></div>
+        <div id="tags">
+          <div id="home">
+            <input type="checkbox" class="filter"/>
+            <div class="tagname">@home</div>
+            <a onclick="window.App.newTodo('@home: ')"><img class="new"/></a>
+        </div>
       </div>
+      <div id="todo-stats"></div>
+
     </div>
 
     <!-- Templates -->
 
     <script type="text/template" id="item-template">
-      <div class="todo ui-widget-content <%= done ? 'done' : '' %>">
-        <div class="display">
-          <input class="check" type="checkbox" <%= done ? 'checked="checked"' : '' %> />
+      <div tabindex="0" class="cell selectable ui-widget-content <%= done ? 'done' : '' %> <%= selected ? 'selected' : '' %>">
+        <div class="handle"/>
+        <div class="display" >
           <div class="todo-content"></div>
-          <span class="todo-destroy"></span>
+        <!-- <span class="todo-destroy"></span> -->
+          <input tabindex="-1" class="check" type="checkbox" <%= done ? 'checked="checked"' : '' %>><div class="checkbox_label">done</div></input>
         </div>
         <div class="edit">
-          <input class="todo-input" type="text" value="" />
+          <textarea maxlength=100 class="todo-input" type="text" value="" />
         </div>
-      </div>
+      </a>
     </script>
 
     <script type="text/template" id="stats-template">
