@@ -7,3 +7,6 @@
 [submodule "support/node-formidable"]
 	path = support/node-formidable
 	url = http://github.com/felixge/node-formidable.git
+[submodule "support/formidable"]
+	path = support/formidable
+	url = http://github.com/felixge/node-formidable.git
