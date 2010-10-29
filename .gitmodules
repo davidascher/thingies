@@ -4,3 +4,6 @@
 [submodule "support/connect-form"]
 	path = support/connect-form
 	url = http://github.com/visionmedia/connect-form.git
+[submodule "support/node-formidable"]
+	path = support/node-formidable
+	url = http://github.com/felixge/node-formidable.git
