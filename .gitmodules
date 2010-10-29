@@ -1,3 +1,6 @@
 [submodule "support/connect-auth"]
 	path = support/connect-auth
 	url = http://github.com/ciaranj/connect-auth.git
+[submodule "support/connect-form"]
+	path = support/connect-form
+	url = http://github.com/visionmedia/connect-form.git
