@@ -15,8 +15,8 @@ $(function(){
     },
 
     // Toggle the `done` state of this todo item.
-    toggle: function() {
-      this.save({done: !this.get("done")});
+    toggleAndDeselect: function() {
+      this.save({done: !this.get("done"), selected: false});
     },
 
     toggleSelect: function() {
@@ -75,12 +75,6 @@ $(function(){
 
   });
 
-  // Create our global collection of **Todos**.
-  window.Todos = new TodoList;
-
-  // Todo Item View
-  // --------------
-
   // The DOM element for a todo item...
   window.TodoView = Backbone.View.extend({
 
@@ -113,6 +107,8 @@ $(function(){
     // Re-render the contents of the todo item.
     render: function() {
       $(this.el).html(this.template(this.model.toJSON()));
+      $(this.el).addClass('col1');
+      $(this.el).addClass('box');
       $(this.el).find(".cell").hover(function(event) {
         obj = $(this);
         obj.toggleClass('hover');
@@ -125,29 +121,42 @@ $(function(){
     // we use `jQuery.text` to set the contents of the todo item.
     setContent: function() {
       var content = this.model.get('content');
-      this.$('.todo-content').text(content);
+      this.$('.todo-content').html(window.markdown.toHTML(content));
       this.$('.todo-input').val(content);
     },
 
     // Toggle the `"done"` state of the model.
     toggleDone: function() {
       this.model.toggle();
+      $(this.el).toggleClass('big');
     },
-    toggleSelect: function() {
+    toggleSelect: function(e) {
+      // detect if it's a double-click, and don't do anything (to let the
+      // double click handler deal w/ it.)
+      if (e.detail == 2) return;
+      console.log(e);
       this.model.toggleSelect();
     },
 
     // Switch this view into `"editing"` mode, displaying the input field.
     edit: function() {
-      $(".editing").removeClass('editing');
-      $(this.el).addClass("editing");
-      $(".editing input").select();
-      $(".editing input").focus();
+      try {
+        console.log("DOING EDIT");
+        $(".editing").removeClass('editing');
+        $(this.el).addClass("editing");
+        //console.log(this.model.get('content'));
+        //$(this.el).find(".todo-content").text(this.model.get('content'));
+        $(".editing textarea").select();
+        $(".editing textarea").focus();
+      } catch (e) {
+        console.log(e);
+      }
     },
 
     // If you hit enter, submit the changes to the todo item's `content`.
     updateOnEnter: function(e) {
-      if (e.keyCode != 13) return;
+      console.log(e);
+      if (e.keyCode != 13 || ! e.ctrlKey) return;
       var updateTags = _.bind(this.updateTags, this);
       this.model.save({content: this.$(".todo-input").val(),
                       order: 1,}, {success: updateTags});
@@ -163,6 +172,109 @@ $(function(){
     }
 
   });
+
+  window.Tag = Backbone.Model.extend({
+
+    // Ensure that each Tag created has `content`.
+    initialize: function() {
+      if (!this.get("name")) {
+        this.set({"name": 'untitled'});
+      }
+    },
+    clear: function() {
+      this.destroy();
+      $(this.view.el).remove();
+    },
+    error: function(a) {
+      console.log("GOT ERROR", a);
+    }
+  });
+
+
+  // Todo Collection
+  // ---------------
+
+  window.TagList = Backbone.Collection.extend({
+    model: Tag,
+    url: "/tags",
+    comparator: function(Tag) {
+      return Tag.get('name');
+    }
+  });
+
+  // The DOM element for a Tag item...
+  window.TagView = Backbone.View.extend({
+
+    //... is a list tag.
+    tagName:  "div",
+
+    // Cache the template function for a single item.
+    template: _.template($('#tag-template').html()),
+
+    // The DOM events specific to an item.
+    events: {
+      "click .filter"              : "toggleFilter",
+      "click .new"                 : "newWithTag",
+    },
+
+    // The TagView listens for changes to its model, re-rendering. Since there's
+    // a one-to-one correspondence between a **Tag** and a **TagView** in this
+    // app, we set a direct reference on the model for convenience.
+    initialize: function() {
+      _.bindAll(this, 'render');
+      this.model.bind('change', this.render);
+      this.model.view = this;
+    },
+
+    // Re-render the contents of the Tag item.
+    render: function() {
+      $(this.el).html(this.template(this.model.toJSON()));
+      this.setContent();
+      return this;
+    },
+
+    // To avoid XSS (not that it would be harmful in this particular app),
+    // we use `jQuery.text` to set the contents of the Tag item.
+    setContent: function() {
+      var content = this.model.get('name');
+      this.$('.tagname').text(content);
+    },
+
+    toggleFilter: function() {
+      var checked = $(this.el).find('.filter').attr('checked');
+      var curFilter = $("#filter")[0].value;
+      var words = curFilter.match(/\w+|"[^"]+"/g) || []; // split words
+      var newFilter = this.model.attributes['name'];
+      if (checked && ! _.contains(newFilter, words)){
+        words.push(newFilter);
+      } else if (_.contains(words, newFilter)){
+        words = _.without(words, newFilter);
+        $("#filter")[0].value = words.join(' ');
+        App.updateFilter();
+      }
+      $("#filter")[0].value = words.join(' ');
+      App.updateFilter();
+    },
+
+    newWithTag: function(filter) {
+      console.log("in newWithTag");
+      App.showNewTodoDialog(this.model.attributes['name']+ ': ');
+    },
+
+    // Remove the item, destroy the model.
+    clear: function() {
+      this.model.clear();
+    },
+    
+    error: function(a) {
+    }
+
+  });
+
+
+  // Create our global collection of **Todos**.
+  window.Todos = new TodoList;
+  window.Tags = new TagList;
 
   // The Application
   // ---------------
@@ -181,7 +293,7 @@ $(function(){
     events: {
       "keypress #new-todo":  "createOnEnter",
       "click .todo-clear a": "clearCompleted",
-      "keyup #filter": "filterKeyup"
+      "keyup #filter": "updateFilter"
     },
 
     // At initialization we bind to the relevant events on the `Todos`
@@ -191,13 +303,18 @@ $(function(){
       _.bindAll(this, 'addOne', 'addAll', 'render');
 
       this.input    = this.$("#new-todo");
-      this.tags = ['work', 'home', 'shopping'];
+      this.tags = [];
       this.words = {};
 
       Todos.bind('add',     this.addOne);
       Todos.bind('refresh', this.addAll);
       Todos.bind('all',     this.render);
       Todos.fetch();
+
+      Tags.bind('add',     this.addOneTag);
+      Tags.bind('refresh', this.addAllTags);
+      Tags.fetch();
+
 
       // find out what the server needs to tell us (user name, etc.)
       $.ajax({
@@ -210,11 +327,15 @@ $(function(){
       });
 
       window.tags = this.tags;
-      this.autocomplete = $("#new-todo").autocomplete(window.tags, {
-        multiple: true,
-        multipleSeparator: " ",
-        autoFill: true,
-      });
+      // this autocomplete is too iffy.  In particular:
+      //   - the box shwos up at the bottom of the textbox, not under the cursor
+      //   - it will case-correct if the only match is something w/ a case difference.
+      //this.autocomplete = $("#new-todo").autocomplete(window.tags, {
+      //  multiple: true,
+      //  autoFill: false,
+      //  multipleSeparator: " ",
+      //  autoFill: true,
+      //});
 
       // disabling sortable because interacts badly w/ selection (move and things get unselected)
       //$( ".sortable" ).sortable({
@@ -222,9 +343,33 @@ $(function(){
       //  revert: true
       //});
       $( ".cell" ).disableSelection();
+      $("#bigN").click(_.bind(this.showNewTodoDialog, this))
       
       // XXX Move this to backbone model
-      $("html").keydown(_.bind(this.keypress, this));
+      $("html").keydown(_.bind(this.keydown, this));
+      $("html").keypress(_.bind(this.keypress, this));
+    },
+
+    showNewTodoDialog: function(prefill) {
+      try {
+        if (this.onEscape) return;
+        this.onEscape = _.bind(this.hideNewTodoDialog, this);
+        newTodo = $("#new-todo-box");
+        newTodo.removeClass('hidden');
+        $("#new-todo")[0].focus();
+        $("#new-todo")[0].select();
+        if (prefill && typeof(prefill) == "string") {
+          $("#new-todo")[0].textContent = prefill;
+          $("#new-todo")[0].selectionStart = $("#new-todo")[0].selectionEnd;
+        }
+      } catch (e) {
+        console.log(e);
+      }
+    },
+
+    hideNewTodoDialog: function() {
+      $("#new-todo-box").addClass('hidden');
+      $("#filter").focus();
     },
 
     // Re-rendering the App just means refreshing the statistics -- the rest
@@ -246,7 +391,34 @@ $(function(){
       el = this.$("#todo-list").append(view.render().el);
       el.view = view;
     },
-    
+    // Add all items in the **Todos** collection at once.
+    addAll: function() {
+      Todos.each(this.addOne);
+      this.updateTags();
+      $('#todo-list').masonry({
+        singleMode: true, 
+        itemSelector: 'li' 
+      });
+
+
+    },
+
+    addOneTag: function(tag) {
+      try {
+        var view = new TagView({model: tag});
+        el = this.$("#tags").prepend(view.render().el);
+        el.view = view;
+      } catch (e) {
+        console.log(e);
+      }
+      
+    },
+
+    addAllTags: function() {
+      Tags.each(window.App.addOneTag); // WHY is this not the app?
+    },
+
+
     updateTags: function() {
       appwords = this.words;
       _.each(Todos.models, function(item) {
@@ -265,13 +437,7 @@ $(function(){
       tags = _.filter(_.keys(appwords), function(word) {
         return (appwords[word] > 0)
       });
-      this.autocomplete.setOptions({data: tags});
-    },
-
-    // Add all items in the **Todos** collection at once.
-    addAll: function() {
-      Todos.each(this.addOne);
-      this.updateTags();
+      //this.autocomplete.setOptions({data: tags});
     },
 
     // Generate the attributes for a new Todo item.
@@ -292,39 +458,51 @@ $(function(){
       var updateTags = _.bind(this.updateTags, this);
       todo = Todos.create(this.newAttributes(), {success: updateTags});
       this.input.val('');
+      this.hideNewTodoDialog();
+      this.onEscape = null;
     },
 
     keypress: function(e) {
+      console.log(this.onEscape);
+      if (e.charCode == 110 && !this.onEscape) { // 'n'
+        e.stopPropagation();
+        e.preventDefault();
+        this.showNewTodoDialog();
+      }
+    },
+    
+    keydown: function(e) {
       if (e.which == 32) { // Space bar toggles Done state on all selected todos
         if (! $(e.target).find('#todos').length) {
           return;
         }
-        _.each(Todos.selected(), function(todo){ todo.toggle(); });
+        _.each(Todos.selected(), function(todo){ todo.toggleAndDeselect(); });
         e.preventDefault();
         e.stopPropagation();
       }
       else if (e.which == 27) { // Escape clears selection
-        _.each(Todos.selected(), function(todo){ todo.toggleSelect(); });
         e.preventDefault();
         e.stopPropagation();
+        if (this.onEscape) {
+          this.onEscape()
+          this.onEscape = null;
+        } else {
+          _.each(Todos.selected(), function(todo){ todo.toggleSelect(); });
+        }
       }
-      //else if (e.which == 8) { // capture back?
-      ////  _.each(Todos.selected(), function(todo){ todo.toggleSelect(); });
-      //  e.preventDefault();
-      //  e.stopPropagation();
-      //}
     },
     
-    filterKeyup: function(event) {
-      var filterNode = $(event.target);
-      var filter = filterNode.val();
+    updateFilter: function() {
+      var filterNode = $("#filter");
+      var filter = filterNode.val().trim();
       _.each($("li"), function (e) {
         content = $(e).find('.todo-content')[0];
         var matchString = content.textContent;
-        if (matchString && matchString.search(new RegExp(filter, "i")) < 0)
+        if (filter && matchString && matchString.search(new RegExp(filter, "i")) < 0) {
           $(e).hide();
-        else
+        } else {
           $(e).show();
+        }
       });
     },
 
@@ -333,6 +511,7 @@ $(function(){
       _.each(Todos.done(), function(todo){ todo.clear(); });
       return false;
     },
+    
 
   });
   // Finally, we kick things off by creating the **App**.

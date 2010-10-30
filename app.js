@@ -97,15 +97,24 @@ app.get ('/logout', function(req, res, params) {
 })
 
 function getUid(req) {
+  ensureAuthenticated(req)
   if (PROD)
     return req.getAuthDetails().user.username;
   else
     return 'no idea';
 }
 
+app.get('/tags', function(req, res, next) {
+  uid = getUid(req);
+  redis.lrange(uid+'::tags', 0, -1, function(err, tags) {
+    res.writeHead(200, {"Content-Type":"application/json"});
+    console.log("[{\"name\":\"work\"}, {\"name\":\"home\"}, {\"name\":\"play\"}, {\"name\":\"gambier\"}]")
+    res.end("[{\"name\":\"work\"}, {\"name\":\"home\"}, {\"name\":\"play\"}, {\"name\":\"gambier\"}]")
+  })
+})
+
 // Get all current TODOs
 app.get('/todos', function(req, res, next){
-  ensureAuthenticated(req)
   // return all todos
   uid = getUid(req);
   redis.smembers(uid+"todos", function(err, todo_keys) {
@@ -121,6 +130,7 @@ app.get('/todos', function(req, res, next){
         for (j = 0; j < todos.length; j++) {
           if (todos[j]) cleanedtodos.push(todos[j]);
         }
+        console.log('['+cleanedtodos.toString()+']')
         res.end('['+cleanedtodos.toString()+']');
       });
     } else {
@@ -131,7 +141,6 @@ app.get('/todos', function(req, res, next){
 
 // Add a new TODO
 app.post('/todos', function(req, res, next){
-  ensureAuthenticated(req)
   uid = getUid(req);
   redis.incr("ids::todos", function(err, id) {
     todo_key = uid+"todos::"+ id;
@@ -152,7 +161,6 @@ app.post('/todos', function(req, res, next){
 
 // Update a TODO
 app.put('/todos/(*)', function(req, res, next){
-  ensureAuthenticated(req)
   uid = getUid(req);
   todo_key = uid+"todos::" + req.params[0];
   redis.set(todo_key, req.body.model, function(err, ok) {
@@ -165,7 +173,7 @@ app.put('/todos/(*)', function(req, res, next){
 
 // Remove a TODO
 app.del('/todos/(*)', function(req, res, next){
-  ensureAuthenticated(req)
+  uid = getUid(req); // ensures auth
   id = req.params[0];
   todo_key = uid+"todos::" + id;
   redis.del(todo_key, function(err, ok) {

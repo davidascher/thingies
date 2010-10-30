@@ -775,8 +775,12 @@ $.fn.selection = function(start, end) {
 					selRange.moveEnd("character", end);
 					selRange.select();
 				}
-			} else if( this.setSelectionRange ){
-				this.setSelectionRange(start, end);
+			} else if( this.setSelectionRange ){ // doesn't work in FF4!
+				// XXX file bug against minefield?
+				//console.log(this.value, start, Math.min(end, this.value.length));
+				this.selectionStart = start;
+				this.selectioNend = end;
+				//this.setSelectionRange(start, end);
 			} else if( this.selectionStart ){
 				this.selectionStart = start;
 				this.selectionEnd = end;

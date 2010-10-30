@@ -1,7 +1,7 @@
-- weird reflow issues with selected reflow
-- tags:
-  - add tag
-  - remove tag
-  - filter by tag
-  - clear filter
-  - save changes to tags
+- figure out less chaotic way of handling keyboard shortcuts -- if anything has focus, shouldn't do single keystroke things?
+- offer to create tags based on filters
+- add 'clear all filters'
+- update tags being checked based on what people type in filter box
+- persist tags!
+- figure out what to do about markdown -- maybe do just bold, italic, and autolinkify/phoneify
+- clear selection on filter, so we don't operate on hidden notes.

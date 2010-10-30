@@ -10,10 +10,10 @@ table, caption, tbody, tfoot, thead, tr, th, td {
   padding: 0;
   border: 0;
   outline: 0;
-  font-weight: inherit;
-  font-style: inherit;
+  /*font-weight: inherit;*/
+  /*font-style: inherit;*/
   font-size: 100%;
-  font-family: inherit;
+  /*font-family: inherit;*/
   vertical-align: baseline;
 }
 body {
@@ -24,6 +24,38 @@ body {
   font-size: 14px;
   line-height: 1.4em;
   color: #333333;
+}
+
+
+
+button.button {
+  padding: 1ex;
+  border: 1px solid grey;
+  font-size: 16px;
+  background-color: lightgrey;
+  margin: 20px;
+  margin-bottom: 18px;
+  display: inline;
+  border-radius: 3px;
+  
+  -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+  -o-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+}
+
+.underline {
+  display: block;
+  text-decoration: underline;
+}
+
+button.button:active {
+  margin-top: 18px;
+  margin-bottom: 20px;
+  -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
+  -o-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
 }
 
 ol, ul {
@@ -89,7 +121,7 @@ a:hover {
   width: 100%;
 }
 
-#create-todo input {
+#filter {
   width: 366px;
   font-size: 16px !important;
   font-family: inherit;
@@ -102,6 +134,43 @@ a:hover {
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
   -o-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
   box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
+}
+
+#new-todo {
+  width: 366px;
+  font-size: 16px !important;
+  font-family: inherit;
+  line-height: 1.4em;
+  border: 0;
+  outline: none;
+  padding: 6px;
+  border: 1px solid #ccc;
+  -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
+  -o-box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 1px 2px 0 inset;
+}
+
+#new-todo-box {
+  z-index: 10;
+  position: absolute;
+  left: 24%;
+  top: 50%;
+  padding: 3em;
+  display: block;
+  overflow: auto;
+  width: 400px;
+  height: 10em;
+  background-color: white;
+  border: 1px solid #999999;
+  -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+  -o-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+}
+
+#new-todo {
+  height: 7em;
 }
 
 #create-todo #filter {
@@ -127,25 +196,55 @@ a:hover {
   margin-left: -85px;
 }
 
+#main {
+  position: relative;
+  padding-right: 2em;
+}
+
+#todos {
+  display: inline-block;
+  width: 85%;
+}
+
+#tags {
+  position: absolute;
+  top: 2em;
+  right: 1em;
+  width: 13%;
+}
+
+a.new {
+  border: none;
+  outline: none;
+}
+
+img.new {
+  background-image: url('add.png');
+  /*border: 1px solid red;*/
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+}
+
+input.filter {
+  display: inline !important;
+}
+div.tagname {
+  display: inline !important;
+}
+
 #todo-list {
   list-style-type: none;
-  padding-top: 1em;
-  padding-left: 2em;
-  padding-right: 2em;
   border: 1px;
   overflow: auto;
 }
-
-/*#todo-list .cell {*/
-/*  margin: 13px;*/
-/*}*/
 
 #todo-list .cell.selected, #todo-list .cell.hover.selected {
   background-color: #fffd7f;
   /*margin-left: 1px;*/
   /*margin-top: 1px;*/
   /*margin-left: -2px;*/
-  margin-top: -2px;
+  /*margin-top: -2px;*/
   /*padding-left: 2px;*/
   -moz-transition-property: box-shadow, margin padding;
   -moz-transition-duration: .1s;
@@ -160,7 +259,7 @@ a:hover {
 #todo-list .cell.hover {
   background-color: #fffbbb;
   /*margin-left: -1px;*/
-  margin-top: -1px;
+  /*margin-top: -1px;*/
   /*padding-left: 1px;*/
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
@@ -169,17 +268,44 @@ a:hover {
 }
 
 
+.box {
+  border: 1px solid red;
+}
+
+#todo-list li:first-child .cell {
+  padding-top: 10px;
+  margin-top: 10px;
+}
+#todo-list li:first-child .box {
+  padding-top: 5px;
+}
+
+#todo-list li:nth-child(2n) .cell {
+  padding-top: 7px;
+  margin-top: 15px;
+}
+#todo-list li:nth-child(2n) .box {
+  padding-top: 0px;
+}
+
+#todo-list li:nth-child(3n) .box {
+  padding-top: 13px;
+  margin-top: 8px;
+}
+#todo-list li:nth-child(3n) .box {
+  padding-top: 7px;
+}
+
 li {
   -moz-transition-property: left, top;
   -moz-transition-duration: .1s;
 }
 
-.new {
-  background-color: yellow;
-}
-
 #todo-list li {
   float: left;
+}
+
+#todo-list li .cell {
   min-width: 120px;
   max-width: 240px;
   margin: 5px;
@@ -189,6 +315,8 @@ li {
   -o-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
   box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
   position: relative;
+  -moz-transition-property: width, height, opacity;
+  -moz-transition-duration: .4s;
 }
 
   #todo-list .check {
@@ -256,11 +384,9 @@ li {
   font-size: 24px;
   font-family: inherit;
   overflow: hidden;
+  text-wrap: normal;
   line-height: 1.2em;
   padding-bottom: 2em;
-}
-
-.cell:focus {
 }
 
 #todo-list .editing .display,

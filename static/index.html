@@ -10,7 +10,9 @@
     <script src="static/vendor/jquery.autocomplete.js"></script>
     <script src="static/vendor/underscore-1.1.0.js"></script>
     <script src="static/backbone.js"></script>
+    <script src="static/markdown.js"></script>
     <script src="static/todos.js"></script>
+    <script src="static/jquery.masonry.min.js"></script>
     <link rel="stylesheet" type="text/css" href="static/vendor/jquery.autocomplete.css" /> 
   </head>
 
@@ -26,8 +28,12 @@
         <h1>Thingies: <span id="username"/></h1> 
       </div>
 
+
         <div id="create-todo">
-          <input id="new-todo" placeholder="What needs to be done?" type="text" />
+          <div class="cell hidden" id="new-todo-box">
+            <textarea id="new-todo" placeholder="What needs to be done?" type="text"></textarea>
+          </div>
+          <button id="bigN" class="button">New...</button>
           <input id="filter" placeholder="filter by..." type="search"/>
         </div>
 
@@ -36,10 +42,6 @@
           <ul id="todo-list" class="grid sortable"/>
         </div>
         <div id="tags">
-          <div id="home">
-            <input type="checkbox" class="filter"/>
-            <div class="tagname">@home</div>
-            <a onclick="window.App.newTodo('@home: ')"><img class="new"/></a>
         </div>
       </div>
       <div id="todo-stats"></div>
@@ -49,18 +51,28 @@
     <!-- Templates -->
 
     <script type="text/template" id="item-template">
-      <div tabindex="0" class="cell selectable ui-widget-content <%= done ? 'done' : '' %> <%= selected ? 'selected' : '' %>">
-        <div class="handle"/>
-        <div class="display" >
-          <div class="todo-content"></div>
-        <!-- <span class="todo-destroy"></span> -->
-          <input tabindex="-1" class="check" type="checkbox" <%= done ? 'checked="checked"' : '' %>><div class="checkbox_label">done</div></input>
+      <div class="box">
+        <div tabindex="0" class="cell selectable ui-widget-content <%= done ? 'done' : '' %> <%= selected ? 'selected' : '' %>">
+          <div class="display" >
+            <div class="todo-content"></div>
+          <!-- <span class="todo-destroy"></span> -->
+            <input tabindex="-1" class="check" type="checkbox" <%= done ? 'checked="checked"' : '' %>><div class="checkbox_label">done</div></input>
+          </div>
+          <div class="edit">
+            <textarea maxlength=100 class="todo-input" type="text" value="" />
+          </div>
         </div>
-        <div class="edit">
-          <textarea maxlength=100 class="todo-input" type="text" value="" />
-        </div>
-      </a>
+      </div>
     </script>
+
+    <script type="text/template" id="tag-template">
+      <div class="tag" id="home">
+        <input type="checkbox" class="filter"/>
+        <div class="tagname"></div>
+        <a href="javascript:0" class="new"><img class="new"/></a>
+      </div>
+    </script>
+
 
     <script type="text/template" id="stats-template">
       <% if (total) { %>
