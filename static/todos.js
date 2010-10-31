@@ -515,7 +515,7 @@ $(function(){
       }
     },
     
-    updateFilter: function() {
+    updateFilter: function(e) {
       var filterNode = $("#filter");
       var filter = filterNode.val().trim();
       var speed = 300;

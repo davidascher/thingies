@@ -1,14 +1,24 @@
-- figure out less chaotic way of handling keyboard shortcuts -- if anything has focus, shouldn't do single keystroke things?
-- offer to create tags based on filters
-- add 'clear all filters'
-- update tags being checked based on what people type in filter box
-- persist tags!
-- figure out what to do about markdown -- maybe do just bold, italic, and autolinkify/phoneify
-- clear selection on filter, so we don't operate on hidden notes.
-- convert filtering to use classes so that masonry can do its magic (http://desandro.com/demo/masonry/docs/filtering.html)
-- figure out inbox + today + next
-- make top part minimal:
+BUGS
 
-  [ username ]  [ new ] [ mark done ] [ delete marked ]
-  
-- make lasso selection work
+  - on update, ensure reflow and tag updating
+
+CLEANUP
+
+  - figure out less chaotic way of handling keyboard shortcuts -- if anything has focus, shouldn't do single keystroke things?
+  - make top part minimal:
+    [ username ]  [ new ] [ mark done ] [ delete marked ]
+
+FEATURES
+  - make mark done actually do that. (and be 'mark undone' if all are marked)
+  - make clean up do that
+  - figure out inbox + today + next
+  - offer to create tags based on filters
+  - add 'clear all filters'
+  - update tags being checked based on what people type in filter box
+  - persist tags!
+  - clear selection on filter, so we don't operate on hidden notes.
+  - make lasso selection work
+
+DECISIONS
+  - figure out what to do about markdown -- maybe do just bold, italic, and autolinkify/phoneify
+

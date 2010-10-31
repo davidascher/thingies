@@ -22,13 +22,8 @@
 
       <div id="account">
         <a id="logout" href="/logout">logout</a>
+        I know you as: <span id="username"/>
       </div>
-      
-      <div class="title">
-        <h1>Thingies: <span id="username"/></h1> 
-      </div>
-
-
         <div id="create-todo">
           <div class="cell hidden" id="new-todo-box">
             <textarea id="new-todo" placeholder="What needs to be done?" type="text"></textarea>
@@ -40,12 +35,17 @@
         </div>
 
       <div id="main">
+        <div id="tabbar">
+          <button id="inbox" class="button toggle current">inbox</button>
+          <button id="today" class="button toggle">today</button>
+          <button id="next" class="button toggle">next</button>
+        </div>
         <div id="todos">
           <div id="todo-list" class="grid sortable"/>
         </div>
+      </div>
         <div id="tags">
         </div>
-      </div>
       <div id="todo-stats"></div>
 
     </div>

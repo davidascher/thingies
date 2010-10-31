@@ -42,7 +42,7 @@ var app = express.createServer(
                               ])
                         );
 
-var STATIC_DIR = path.join(process.cwd(), 'static');
+var STATIC_DIR = path.join(__dirname, 'static');
 
 app.use(express.favicon());  // XXX come up with our own favicon
 app.use(express.logger({format: '":method :url" :status'}))
