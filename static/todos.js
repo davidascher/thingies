@@ -551,6 +551,7 @@ $(function(){
     updateFilter: function(e) {
       var filterNode = $("#filter");
       var filter = filterNode.val().trim();
+      if (!filter) return;
       var speed = 300;
       _.each($("#todo-list .box"), function (e) {
         content = $(e).find('.todo-content')[0];
