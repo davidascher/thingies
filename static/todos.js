@@ -79,7 +79,7 @@ $(function(){
   window.TodoView = Backbone.View.extend({
 
     //... is a list tag.
-    tagName:  "li",
+    tagName:  "div",
 
     // Cache the template function for a single item.
     template: _.template($('#item-template').html()),
@@ -107,7 +107,6 @@ $(function(){
     // Re-render the contents of the todo item.
     render: function() {
       $(this.el).html(this.template(this.model.toJSON()));
-      $(this.el).addClass('col1');
       $(this.el).addClass('box');
       $(this.el).find(".cell").hover(function(event) {
         obj = $(this);
@@ -129,22 +128,21 @@ $(function(){
     toggleDone: function() {
       this.model.toggle();
       $(this.el).toggleClass('big');
+      App.updateButtons();
     },
     toggleSelect: function(e) {
       // detect if it's a double-click, and don't do anything (to let the
       // double click handler deal w/ it.)
       if (e.detail == 2) return;
-      console.log(e);
       this.model.toggleSelect();
+      App.updateButtons();
     },
 
     // Switch this view into `"editing"` mode, displaying the input field.
     edit: function() {
       try {
-        console.log("DOING EDIT");
         $(".editing").removeClass('editing');
         $(this.el).addClass("editing");
-        //console.log(this.model.get('content'));
         //$(this.el).find(".todo-content").text(this.model.get('content'));
         $(".editing textarea").select();
         $(".editing textarea").focus();
@@ -155,7 +153,6 @@ $(function(){
 
     // If you hit enter, submit the changes to the todo item's `content`.
     updateOnEnter: function(e) {
-      console.log(e);
       if (e.keyCode != 13 || ! e.ctrlKey) return;
       var updateTags = _.bind(this.updateTags, this);
       this.model.save({content: this.$(".todo-input").val(),
@@ -257,7 +254,6 @@ $(function(){
     },
 
     newWithTag: function(filter) {
-      console.log("in newWithTag");
       App.showNewTodoDialog(this.model.attributes['name']+ ': ');
     },
 
@@ -309,7 +305,7 @@ $(function(){
       Todos.bind('add',     this.addOne);
       Todos.bind('refresh', this.addAll);
       Todos.bind('all',     this.render);
-      Todos.fetch();
+      Todos.fetch({success: function() {window.App.updateButtons()}});
 
       Tags.bind('add',     this.addOneTag);
       Tags.bind('refresh', this.addAllTags);
@@ -336,6 +332,9 @@ $(function(){
       //  multipleSeparator: " ",
       //  autoFill: true,
       //});
+
+      this.masonry =  null
+
 
       // disabling sortable because interacts badly w/ selection (move and things get unselected)
       //$( ".sortable" ).sortable({
@@ -372,6 +371,22 @@ $(function(){
       $("#filter").focus();
     },
 
+    updateButtons: function(e) {
+      console.log(Todos.selected());
+      var hasSelection = (Todos.selected().length > 0);
+      if (hasSelection) {
+        $(".need-selection").removeClass('disabled');
+      } else {
+        $(".need-selection").addClass('disabled');
+      }
+      var hasDone = (Todos.done().length > 0);
+      if (hasDone) {
+        $(".need-done").removeClass('disabled');
+      } else {
+        $(".need-done").addClass('disabled');
+      }
+    },
+
     // Re-rendering the App just means refreshing the statistics -- the rest
     // of the app doesn't change.
     render: function() {
@@ -388,19 +403,24 @@ $(function(){
     addOne: function(todo) {
       var view = new TodoView({model: todo});
       
-      el = this.$("#todo-list").append(view.render().el);
+      newEl = view.render().el;
+      el = this.$("#todo-list").append(newEl);
       el.view = view;
+      if (this.masonry) {
+        // only works w/ appending, which is a UX problem IMO
+        $("#todo-list").masonry({appendedContent: $(newEl)});
+      }
     },
+    
     // Add all items in the **Todos** collection at once.
     addAll: function() {
-      Todos.each(this.addOne);
+      dudes = Todos.each(this.addOne);
+      jdudes = $(dudes);
+      if (! this.masonry) {
+        this.masonry_opts = {columnWidth: 120, itemSelector: '.box'}
+        this.masonry = $('#todo-list').masonry(this.masonry_opts);
+      }
       this.updateTags();
-      $('#todo-list').masonry({
-        singleMode: true, 
-        itemSelector: 'li' 
-      });
-
-
     },
 
     addOneTag: function(tag) {
@@ -460,10 +480,13 @@ $(function(){
       this.input.val('');
       this.hideNewTodoDialog();
       this.onEscape = null;
+      //$('#todo-list').masonry({
+      //  columnWidth: 240,
+      //  itemSelector: '.box' 
+      //});
     },
 
     keypress: function(e) {
-      console.log(this.onEscape);
       if (e.charCode == 110 && !this.onEscape) { // 'n'
         e.stopPropagation();
         e.preventDefault();
@@ -509,6 +532,7 @@ $(function(){
     // Clear all done todo items, destroying their models.
     clearCompleted: function() {
       _.each(Todos.done(), function(todo){ todo.clear(); });
+      this.masonry = $('#todo-list').masonry(this.masonry_opts);
       return false;
     },
     

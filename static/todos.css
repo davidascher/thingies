@@ -26,22 +26,30 @@ body {
   color: #333333;
 }
 
-
-
 button.button {
   padding: 1ex;
   border: 1px solid grey;
   font-size: 16px;
   background-color: lightgrey;
-  margin: 20px;
-  margin-bottom: 18px;
+  /*margin: 20px;*/
+  /*margin-bottom: 18px;*/
   display: inline;
   border-radius: 3px;
-  
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
   -o-box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
   box-shadow: rgba(0, 0, 0, 0.2) 0 2px 4px 0;
+}
+
+
+button.button.disabled {
+  color: grey;
+  background-color: #eee;
+  border-color: #ccc;
+  -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
+  -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
+  -o-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
+  box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
 }
 
 .underline {
@@ -49,9 +57,15 @@ button.button {
   text-decoration: underline;
 }
 
+button.button:hover {
+  background-color: #ddd;
+}
+
+button.button.disabled:hover {
+  background-color: #eee;
+}
+
 button.button:active {
-  margin-top: 18px;
-  margin-bottom: 20px;
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
   -o-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
@@ -106,7 +120,7 @@ a:hover {
 }
 
 #todo-list {
-  padding: 3em;
+  padding: 1em;
   background-color: #eeeeee;
   min-height: 40em;
   border: 1px solid #999999;
@@ -220,7 +234,6 @@ a.new {
 
 img.new {
   background-image: url('add.png');
-  /*border: 1px solid red;*/
   display: inline-block;
   width: 16px;
   height: 16px;
@@ -268,10 +281,6 @@ div.tagname {
 }
 
 
-.box {
-  border: 1px solid red;
-}
-
 #todo-list li:first-child .cell {
   padding-top: 10px;
   margin-top: 10px;
@@ -301,13 +310,9 @@ li {
   -moz-transition-duration: .1s;
 }
 
-#todo-list li {
-  float: left;
-}
-
-#todo-list li .cell {
-  min-width: 120px;
-  max-width: 240px;
+#todo-list .cell {
+  /*min-width: 120px;*/
+  max-width: 220px;
   margin: 5px;
   background: white;
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
@@ -381,7 +386,7 @@ li {
 }
 
 #todo-list .todo-content {
-  font-size: 24px;
+  font-size: 16px;
   font-family: inherit;
   overflow: hidden;
   text-wrap: normal;
@@ -399,7 +404,7 @@ li {
 }
 
 #todo-list .editing textarea {
-  width: 190px;
+  width: 120px;
   min-height: 290px;
   font-size: 24px;
   font-family: inherit;
@@ -428,4 +433,12 @@ li {
   visibility: hidden !important;
   width: 0 !important;
   min-width: 0 !important;
+}
+
+
+#todo-list.masoned, #todo-list.masoned .box {
+  -webkit-transition: all .3s ease-out;
+     -moz-transition: all .3s ease-out;
+       -o-transition: all .3s ease-out;
+          transition: all .3s ease-out;
 }

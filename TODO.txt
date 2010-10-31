@@ -5,3 +5,10 @@
 - persist tags!
 - figure out what to do about markdown -- maybe do just bold, italic, and autolinkify/phoneify
 - clear selection on filter, so we don't operate on hidden notes.
+- convert filtering to use classes so that masonry can do its magic (http://desandro.com/demo/masonry/docs/filtering.html)
+- figure out inbox + today + next
+- make top part minimal:
+
+  [ username ]  [ new ] [ mark done ] [ delete marked ]
+  
+- make lasso selection work

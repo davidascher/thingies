@@ -34,12 +34,14 @@
             <textarea id="new-todo" placeholder="What needs to be done?" type="text"></textarea>
           </div>
           <button id="bigN" class="button">New...</button>
+          <button id="markDone" class="button disabled need-selection">Mark Done</button>
+          <button id="deleteDone" class="button disabled need-done">Clean up</button>
           <input id="filter" placeholder="filter by..." type="search"/>
         </div>
 
       <div id="main">
         <div id="todos">
-          <ul id="todo-list" class="grid sortable"/>
+          <div id="todo-list" class="grid sortable"/>
         </div>
         <div id="tags">
         </div>
@@ -51,7 +53,6 @@
     <!-- Templates -->
 
     <script type="text/template" id="item-template">
-      <div class="box">
         <div tabindex="0" class="cell selectable ui-widget-content <%= done ? 'done' : '' %> <%= selected ? 'selected' : '' %>">
           <div class="display" >
             <div class="todo-content"></div>
@@ -62,7 +63,6 @@
             <textarea maxlength=100 class="todo-input" type="text" value="" />
           </div>
         </div>
-      </div>
     </script>
 
     <script type="text/template" id="tag-template">
