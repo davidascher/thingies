@@ -19,6 +19,10 @@ $(function(){
       this.save({done: !this.get("done"), selected: false});
     },
 
+    markDoneAndDeselect: function() {
+      this.save({done: true, selected: false});
+    },
+
     toggleSelect: function() {
       this.save({selected: !this.get("selected")});
     },
@@ -288,8 +292,9 @@ $(function(){
     // Delegated events for creating new items, and clearing completed ones.
     events: {
       "keypress #new-todo":  "createOnEnter",
-      "click .todo-clear a": "clearCompleted",
-      "keyup #filter": "updateFilter"
+      "click #deleteDone": "clearCompleted",
+      "keyup #filter": "updateFilter",
+      "click #markDone": "markSelectedDone"
     },
 
     // At initialization we bind to the relevant events on the `Todos`
@@ -311,6 +316,8 @@ $(function(){
       Tags.bind('refresh', this.addAllTags);
       Tags.fetch();
 
+      Todos.bind('change',     _.bind(this.onChange, this));
+      Todos.bind('remove',     _.bind(this.onChange, this));
 
       // find out what the server needs to tell us (user name, etc.)
       $.ajax({
@@ -347,6 +354,17 @@ $(function(){
       // XXX Move this to backbone model
       $("html").keydown(_.bind(this.keydown, this));
       $("html").keypress(_.bind(this.keypress, this));
+    },
+    
+    onChange: function(e) {
+      this.updateButtons();
+    },
+
+    markSelectedDone: function(e) {
+      console.log(e);
+      _.each(Todos.selected(), function(todo){ todo.markDoneAndDeselect(); });
+      e.preventDefault();
+      e.stopPropagation();
     },
 
     showNewTodoDialog: function(prefill) {
@@ -487,11 +505,26 @@ $(function(){
     },
 
     keypress: function(e) {
-      if (e.charCode == 110 && !this.onEscape) { // 'n'
-        e.stopPropagation();
-        e.preventDefault();
-        this.showNewTodoDialog();
+      console.log(e);
+      if (this.onEscape) return;
+      switch (e.charCode) {
+        case 110: // n
+          e.stopPropagation();
+          e.preventDefault();
+          this.showNewTodoDialog();
+          break;
+        case 109: // m
+          e.stopPropagation();
+          e.preventDefault();
+          this.markSelectedDone();
+          break;
+        case 120: // x
+          e.stopPropagation();
+          e.preventDefault();
+          this.clearCompleted();
+          break;
       }
+      console.log(e.charCode);
     },
     
     keydown: function(e) {
