@@ -523,9 +523,9 @@ $(function(){
         content = $(e).find('.todo-content')[0];
         var matchString = content.textContent;
         if (filter && matchString && matchString.search(new RegExp(filter, "i")) < 0) {
-          $(e).addClass('invis').fadeOut(speed);
+          $(e).addClass('invis');
         } else {
-          $(e).removeClass('invis').fadeIn(speed);
+          $(e).removeClass('invis');
         }
       });
       $('#todo-list').masonry(this.masonry_opts);

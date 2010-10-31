@@ -269,6 +269,7 @@ div.tagname {
   box-shadow: rgba(0, 0, 0, 0.2) 0 10px 12px 0;
 }
 
+
 #todo-list .cell.hover {
   background-color: #fffbbb;
   /*margin-left: -1px;*/
@@ -438,4 +439,16 @@ li {
      -moz-transition: all .3s ease-out;
        -o-transition: all .3s ease-out;
           transition: all .3s ease-out;
+}
+
+.box {
+  opacity: 1;
+}
+
+.invis {
+  opacity: 0;
+  -moz-transition-property: opacity;
+  -moz-transition-duration: .1s;
+  -webkit-transition-property: opacity;
+  -webkit-transition-duration: .1s;
 }
