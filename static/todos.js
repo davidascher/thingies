@@ -372,7 +372,6 @@ $(function(){
     },
 
     updateButtons: function(e) {
-      console.log(Todos.selected());
       var hasSelection = (Todos.selected().length > 0);
       if (hasSelection) {
         $(".need-selection").removeClass('disabled');
@@ -417,8 +416,9 @@ $(function(){
       dudes = Todos.each(this.addOne);
       jdudes = $(dudes);
       if (! this.masonry) {
-        this.masonry_opts = {columnWidth: 120, itemSelector: '.box'}
-        this.masonry = $('#todo-list').masonry(this.masonry_opts);
+        this.masonry_opts = {columnWidth: 120, itemSelector: '.box:not(.invis)'}
+        this.masonry = true;
+        $('#todo-list').masonry(this.masonry_opts);
       }
       this.updateTags();
     },
@@ -518,15 +518,17 @@ $(function(){
     updateFilter: function() {
       var filterNode = $("#filter");
       var filter = filterNode.val().trim();
-      _.each($("li"), function (e) {
+      var speed = 300;
+      _.each($("#todo-list .box"), function (e) {
         content = $(e).find('.todo-content')[0];
         var matchString = content.textContent;
         if (filter && matchString && matchString.search(new RegExp(filter, "i")) < 0) {
-          $(e).hide();
+          $(e).addClass('invis').fadeOut(speed);
         } else {
-          $(e).show();
+          $(e).removeClass('invis').fadeIn(speed);
         }
       });
+      $('#todo-list').masonry(this.masonry_opts);
     },
 
     // Clear all done todo items, destroying their models.
