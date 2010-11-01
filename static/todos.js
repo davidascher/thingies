@@ -434,7 +434,7 @@ $(function(){
       dudes = Todos.each(this.addOne);
       jdudes = $(dudes);
       if (! this.masonry) {
-        this.masonry_opts = {columnWidth: 120, itemSelector: '.box:not(.invis)'}
+        this.masonry_opts = {columnWidth: 180, itemSelector: '.box:not(.invis)'}
         this.masonry = true;
         $('#todo-list').masonry(this.masonry_opts);
       }
@@ -505,7 +505,6 @@ $(function(){
     },
 
     keypress: function(e) {
-      console.log(e);
       if (this.onEscape) return;
       switch (e.charCode) {
         case 110: // n
@@ -524,7 +523,7 @@ $(function(){
           this.clearCompleted();
           break;
       }
-      console.log(e.charCode);
+      //console.log(e.charCode);
     },
     
     keydown: function(e) {
@@ -551,17 +550,24 @@ $(function(){
     updateFilter: function(e) {
       var filterNode = $("#filter");
       var filter = filterNode.val().trim();
-      if (!filter) return;
+      changed = false;
       var speed = 300;
       _.each($("#todo-list .box"), function (e) {
         content = $(e).find('.todo-content')[0];
         var matchString = content.textContent;
         if (filter && matchString && matchString.search(new RegExp(filter, "i")) < 0) {
-          $(e).addClass('invis');
+          if (! $(e).hasClass('invis')) {
+            $(e).addClass('invis');
+            changed = true;
+          }
         } else {
-          $(e).removeClass('invis');
+          if ($(e).hasClass('invis')) {
+            $(e).removeClass('invis');
+            changed = true;
+          }
         }
       });
+      if (!changed) return;
       $('#todo-list').masonry(this.masonry_opts);
     },
 

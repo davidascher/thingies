@@ -305,7 +305,7 @@ li {
 
 #todo-list .cell {
   /*min-width: 120px;*/
-  max-width: 220px;
+  max-width: 160px;
   margin: 5px;
   background: white;
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 5px 6px 0;
