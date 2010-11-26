@@ -1,24 +1,36 @@
 BUGS
 
-  - on update, ensure reflow and tag updating
 
 CLEANUP
 
   - figure out less chaotic way of handling keyboard shortcuts -- if anything has focus, shouldn't do single keystroke things?
-  - make top part minimal:
-    [ username ]  [ new ] [ mark done ] [ delete marked ]
 
 FEATURES
-  - make mark done actually do that. (and be 'mark undone' if all are marked)
-  - make clean up do that
-  - figure out inbox + today + next
-  - offer to create tags based on filters
-  - add 'clear all filters'
-  - update tags being checked based on what people type in filter box
-  - persist tags!
-  - clear selection on filter, so we don't operate on hidden notes.
+  - figure out inbox + today + next implications (offer more categories?)
+    - keyboard nav vs. keyboard changes of status
+    - drag & drop?
+
+  - figure out offline writes & sync strategy
+    - talk to mconnor or thunder about sync server and how generic it is
+    
+  - add email fetching or email receiving so that emails can become todos trivially
+    - gmail oauth + look for starred messages in inbox
+    - forward to gmail+tasks w/ filter to auto-star those messages
+
+  - add traditional username/pw auth for those folks
+  - filters
+    - offer to create tags based on filters
+    - add 'clear all filters'
+    - update tags being checked based on what people type in filter box
+    - persist tags!
+    - clear selection on filter, so we don't operate on hidden notes.
   - make lasso selection work
 
 DECISIONS
   - figure out what to do about markdown -- maybe do just bold, italic, and autolinkify/phoneify
+  - make social?
+    - on auth, redirect to /<username>
+    - on view of someone else's view, offer a "add task" button.
+    - show "incoming tasks" in main view
+    - virality is: if person doesn't have account, send an email saying that i'm asking you to do this, let me know when it's done.
 

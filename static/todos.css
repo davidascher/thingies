@@ -438,3 +438,63 @@ li {
   -webkit-transition-property: opacity;
   -webkit-transition-duration: .1s;
 }
+
+@media only screen and (max-width: 480px) {
+  #tabbar, #create-todo, #tags, #account, #todo-stats {
+    display: none;
+  }
+  #todoapp {
+    margin: 0;
+    padding: 0;
+  }
+  #todo-list {
+    background-color: white;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+  }
+  #todos {
+    width: 100%;
+    margin: 0;
+    max-width: 100%;
+    min-width: 100%;
+    display: inline-block;
+  }
+  #todo-list .cell {
+    min-width: 100%;
+    width: 100%;
+    font-size: 20px;
+    margin: 0;
+    padding: 0;
+    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+    -o-box-shadow: rgba(0, 0, 0, 0.2)  0 0 0 0;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+  }
+
+  #todo-list .cell.selected, #todo-list .cell.hover.selected {
+    background-color: #fffd7f;
+    -moz-transition-property: box-shadow, margin padding;
+    -moz-transition-duration: .1s;
+    -webkit-transition-property: box-shadow, margin padding;
+    -webkit-transition-duration: .1s;
+    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+    -o-box-shadow: rgba(0, 0, 0, 0.2)  0 0 0 0;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+  }
+  
+  
+  #todo-list .cell.hover {
+    background-color: #fffbbb;
+    -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+    -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+    -o-box-shadow: rgba(0, 0, 0, 0.2)  0 0 0 0;
+    box-shadow: rgba(0, 0, 0, 0.2) 0 0 0 0;
+  }
+
+  #todo-list .box {
+    position: inherit;
+    width: 100%;
+  }
+}

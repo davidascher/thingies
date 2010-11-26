@@ -360,11 +360,8 @@ $(function(){
       this.updateButtons();
     },
 
-    markSelectedDone: function(e) {
-      console.log(e);
+    markSelectedDone: function() {
       _.each(Todos.selected(), function(todo){ todo.markDoneAndDeselect(); });
-      e.preventDefault();
-      e.stopPropagation();
     },
 
     showNewTodoDialog: function(prefill) {
@@ -498,13 +495,13 @@ $(function(){
       this.input.val('');
       this.hideNewTodoDialog();
       this.onEscape = null;
-      //$('#todo-list').masonry({
-      //  columnWidth: 240,
-      //  itemSelector: '.box' 
-      //});
+      $('#todo-list').masonry({
+        appendedContent: $(todo)
+      });
     },
 
     keypress: function(e) {
+      if (e.target.tagName == "INPUT") return;
       if (this.onEscape) return;
       switch (e.charCode) {
         case 110: // n
@@ -527,6 +524,7 @@ $(function(){
     },
     
     keydown: function(e) {
+      console.log("PHASE:", e.currentTarget.tagName);
       if (e.which == 32) { // Space bar toggles Done state on all selected todos
         if (! $(e.target).find('#todos').length) {
           return;
@@ -568,7 +566,7 @@ $(function(){
         }
       });
       if (!changed) return;
-      $('#todo-list').masonry(this.masonry_opts);
+      $('#todo-list').masonry();
     },
 
     // Clear all done todo items, destroying their models.
