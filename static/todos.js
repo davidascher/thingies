@@ -341,7 +341,7 @@ $(function(){
       //});
 
       this.masonry =  null
-
+      this.handleAllKeys = false;
 
       // disabling sortable because interacts badly w/ selection (move and things get unselected)
       //$( ".sortable" ).sortable({
@@ -354,6 +354,9 @@ $(function(){
       // XXX Move this to backbone model
       $("html").keydown(_.bind(this.keydown, this));
       $("html").keypress(_.bind(this.keypress, this));
+
+      $("#filter").keypress(_.bind(this.keypressInFilter, this));
+
     },
     
     onChange: function(e) {
@@ -363,11 +366,26 @@ $(function(){
     markSelectedDone: function() {
       _.each(Todos.selected(), function(todo){ todo.markDoneAndDeselect(); });
     },
+    
+    keypressInFilter: function(e) {
+      if (this.onEscape) return;
+      this.onEscape = _.bind(this.clearFilter, this);
+    },
+    
+    clearFilter: function() {
+      if ($("#filter").val()) {
+        $("#filter").val('');
+      } else {
+        $("#filter").blur();
+        this.onEscape = null;
+      }
+    },
 
     showNewTodoDialog: function(prefill) {
       try {
         if (this.onEscape) return;
         this.onEscape = _.bind(this.hideNewTodoDialog, this);
+        this.handleAllKeys = true;
         newTodo = $("#new-todo-box");
         newTodo.removeClass('hidden');
         $("#new-todo")[0].focus();
@@ -384,6 +402,7 @@ $(function(){
     hideNewTodoDialog: function() {
       $("#new-todo-box").addClass('hidden');
       $("#filter").focus();
+      this.onEscape = null;
     },
 
     updateButtons: function(e) {
@@ -502,8 +521,14 @@ $(function(){
 
     keypress: function(e) {
       if (e.target.tagName == "INPUT") return;
-      if (this.onEscape) return;
+      if (this.handleAllKeys) return;
       switch (e.charCode) {
+        case 102: // f
+          $("#filter").focus();
+          $("#filter").select();
+          e.stopPropagation();
+          e.preventDefault();
+          break;
         case 110: // n
           e.stopPropagation();
           e.preventDefault();
@@ -524,7 +549,6 @@ $(function(){
     },
     
     keydown: function(e) {
-      console.log("PHASE:", e.currentTarget.tagName);
       if (e.which == 32) { // Space bar toggles Done state on all selected todos
         if (! $(e.target).find('#todos').length) {
           return;
@@ -534,11 +558,12 @@ $(function(){
         e.stopPropagation();
       }
       else if (e.which == 27) { // Escape clears selection
+        console.log('escaping');
         e.preventDefault();
         e.stopPropagation();
         if (this.onEscape) {
+          console.log('calling onEscape');
           this.onEscape()
-          this.onEscape = null;
         } else {
           _.each(Todos.selected(), function(todo){ todo.toggleSelect(); });
         }

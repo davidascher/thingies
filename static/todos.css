@@ -197,13 +197,13 @@ a:hover {
 #tabbar {
   vertical-align: top;
   display: inline-block;
-  width: 5em;
+  width: 7em;
 }
 
 #main {
 }
 #tabbar .toggle {
-  width: 4em;
+  /*width: 5em;*/
   background-color: white;
   -moz-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
   -webkit-box-shadow: rgba(0, 0, 0, 0.2) 0 0px 0px 0;
@@ -221,18 +221,13 @@ a:hover {
   width: 77%;
 }
 
-#tags {
-  display: inline-block;
-  vertical-align: top;
-  width: 13%;
-}
 
 a.new {
   border: none;
   outline: none;
 }
 
-img.new {
+div.new {
   background-image: url('add.png');
   display: inline-block;
   width: 16px;
@@ -242,6 +237,12 @@ img.new {
 input.filter {
   display: inline !important;
 }
+
+.tag {
+  display: block;
+  width: 8em;
+}
+
 div.tagname {
   display: inline !important;
 }
@@ -496,5 +497,12 @@ li {
   #todo-list .box {
     position: inherit;
     width: 100%;
+  }
+  .todo-content: {
+    padding-bottom: 0;
+  }
+  .cell .display {
+    padding: 0;
+    margin: 0;
   }
 }
